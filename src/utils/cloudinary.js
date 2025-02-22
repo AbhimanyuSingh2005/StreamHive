@@ -1,11 +1,7 @@
 import {v2 as cloudinary} from "cloudinary";
 import fs from "fs";
 
-cloudinary.config({ 
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
-    api_key:process.env.CLOUDINARY_API_KEY, 
-    api_secret: process.env.CLOUDINARY_API_SECRET
-});
+
 
 const  uploadOnCludinary = async (filePath)=>{
     try {
@@ -13,6 +9,11 @@ const  uploadOnCludinary = async (filePath)=>{
             console.log("NO FILE PATH PRESENT");
             return null;
         }
+        cloudinary.config({ 
+            cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+            api_key:process.env.CLOUDINARY_API_KEY, 
+            api_secret: process.env.CLOUDINARY_API_SECRET
+        });
         const uploadResponse = await cloudinary.uploader.upload(filePath,{
             resource_type : "auto"
         })
