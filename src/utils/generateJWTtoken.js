@@ -7,10 +7,8 @@ const getAccessToken = async(user) =>{
         
         const accessToken = user.generateAcessToken();
         if(!accessToken) throw new ApiError(500,"Access Generation Failed");
-        // console.log(accessToken);
         return accessToken;
     } catch (error) {
-        // console.log(error);
         throw new ApiError(500,error?.message || "something went wrong during token generation");
     }
 }
@@ -23,7 +21,6 @@ const getefreshToken = async(user) =>{
         await User.findByIdAndUpdate(user._id,{refreshToken});
         return refreshToken;
     } catch (error) {
-        // console.log(error);
         throw new ApiError(500,error?.message || "something went wrong during token generation");
     }
 }

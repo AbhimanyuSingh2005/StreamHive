@@ -6,7 +6,7 @@ import { ApiError } from "../utils/ApiError.js";
 export const authenticateUser = async(req,res,next) =>{
     try {
         const accessToken = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","");
-        console.log(accessToken);
+        // console.log(accessToken);
         if(!accessToken) throw new ApiError(400,"Unauthorized access");
         const decode = jwt.verify(accessToken,process.env.ACCESS_TOKEN_SECRET);
         const user = await User.findById(decode._id);
