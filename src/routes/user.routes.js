@@ -7,7 +7,8 @@ import {registerUser,
     getCurrentUser,
     updateUserDetails,
     updateAvatar,
-    updateCoverImage} from "../controllers/user.controllers.js";
+    updateCoverImage
+} from "../controllers/user.controllers.js";
 import { upload } from "../middlewares/multer.middlewares.js";
 import {authenticateUser} from "../middlewares/authenticate.middlewares.js";
 const router = Router();
@@ -38,5 +39,16 @@ router.route("/updateUserDetails").post(authenticateUser,updateUserDetails);
 router.route("/updateAvatar").post(authenticateUser,upload.single('avatar'),updateAvatar);
 
 router.route("/updateCoverImage").post(authenticateUser,upload.single('coverImage'),updateCoverImage);
+
+// router.route("/uploadVedio").post(authenticateUser,upload.fields([
+//     {
+//         name : "vedio",
+//         maxCount : 1
+//     },
+//     {
+//         name : "thumbnail",
+//         maxCount :1
+//     }
+// ]),uploadVedio);
 
 export default router;
