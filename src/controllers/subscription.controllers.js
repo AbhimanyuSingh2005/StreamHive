@@ -6,9 +6,14 @@ import {ApiResponse} from "../utils/ApiResponse.js";
 const toggleSubscription = asyncHandler(async (req, res) => {
     const {channelId} = req.params;
     const userId = req.user._id;
-    
-    const subscribed = Subscription.findOne({channel: channelId, subscriber: userId});
+    // console.log(channelId);
+    // console.log(userId);
 
+    if(!channelId) throw new ApiError(400, "Channel Id is required");
+    if(channelId === userId) throw new ApiError(400, "You can't subscribe to your own channel");
+
+    const subscribed = await Subscription.findOne({channel: channelId, subscriber: userId});
+    // console.log(subscribed);
     if(!subscribed){
         const subscription = await Subscription.create({channel: channelId, subscriber: userId});
         return res.status(200).json(new ApiResponse(200, "Subscribed to channel" ,subscription));
@@ -49,7 +54,7 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
 })
 
 const getChannelSubscribers = asyncHandler(async (req, res) => {
-    const {channelId} = req.user._id;
+    const channelId = req.user._id;
     const subscribers = await Subscription.aggregate([
         {
             $match: {channel: channelId}

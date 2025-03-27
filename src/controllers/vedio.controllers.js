@@ -55,12 +55,13 @@ const updateVedio = asyncHandler(async (req, res) => {
     const vedioId = req.query.vedioId;
     const userId = req.user._id;
     if(!vedioId) throw new ApiError(401,"Vedio Id is required");
-    if (userId !== vedio.onwer) throw new ApiError(401, "You are not authorized to update this vedio");
     const vedio = await Vedio.findById(vedioId);
+    if (!userId.equals(vedio.onwer)) throw new ApiError(401, "You are not authorized to update this vedio");
+    
     if(!vedio) throw new ApiError(404,"Vedio not found");
     const {title,description} = req.body;
-    vedio.title = title;
-    vedio.description = description;
+    if(title) vedio.title = title;
+    if(description) vedio.description = description;
     await vedio.save();
     res.status(200).json(new ApiResponse(200, "Vedio Updated", vedio));
 })
@@ -69,10 +70,11 @@ const deleteVedio = asyncHandler(async (req, res) => {
     const vedioId = req.query.vedioId;
     const userId = req.user._id;
     if(!vedioId) throw new ApiError(401,"Vedio Id is required");
-    if(userId !== vedio.onwer) throw new ApiError(401,"You are not authorized to delete this vedio");
     const vedio = await Vedio.findById(vedioId);
+    if(!userId.equals(vedio.onwer)) throw new ApiError(401,"You are not authorized to delete this vedio");
+    
     if(!vedio) throw new ApiError(404,"Vedio not found");
-    await vedio.delete();
+    await Vedio.findByIdAndDelete(vedioId);
     res.status(200).json(new ApiResponse(200, "Vedio Deleted", null));
 })
 
@@ -80,8 +82,10 @@ const toogglePublish = asyncHandler(async (req, res) => {
     const vedioId = req.query.vedioId;
     const userId = req.user._id;
     if(!vedioId) throw new ApiError(401,"Vedio Id is required");
-    if(userId !== vedio.onwer) throw new ApiError(401,"You are not authorized to update this vedio");
     const vedio = await Vedio.findById(vedioId);
+    
+    if(!userId.equals(vedio.onwer)) throw new ApiError(401,"You are not authorized to update this vedio");
+    
     if(!vedio) throw new ApiError(404,"Vedio not found");
     vedio.isPublished = !vedio.isPublished;
     await vedio.save();

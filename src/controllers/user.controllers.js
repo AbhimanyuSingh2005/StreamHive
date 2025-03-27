@@ -5,6 +5,7 @@ import {ApiError} from "../utils/ApiError.js";
 import {ApiResponse} from "../utils/ApiResponse.js";
 import {uploadOnCludinary} from "../utils/cloudinary.js";
 import { getAccessToken,getefreshToken } from "../utils/generateJWTtoken.js";
+import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 
 const registerUser = asyncHandler(async (req,res,next) => {
@@ -263,14 +264,14 @@ const getWatchHistory = asyncHandler(async(req,res,next)=>{
         },
         {
             $lookup: {
-                from: Vedio,
+                from: "vedios",
                 localField : "watchHistory",
                 foreignField : "_id",
                 as : "watchHistory",
                 pipeline : [
                     {
                         $lookup:{
-                            from: User,
+                            from: "users",
                             localField: owner,
                             foreignField: _id,
                             as : "owner",

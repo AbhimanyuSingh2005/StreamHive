@@ -7,7 +7,9 @@ import {registerUser,
     getCurrentUser,
     updateUserDetails,
     updateAvatar,
-    updateCoverImage
+    updateCoverImage,
+    getChannelProfile,
+    getWatchHistory
 } from "../controllers/user.controllers.js";
 import { upload } from "../middlewares/multer.middlewares.js";
 import {authenticateUser} from "../middlewares/authenticate.middlewares.js";
@@ -39,6 +41,10 @@ router.route("/updateUserDetails").post(authenticateUser,updateUserDetails);
 router.route("/updateAvatar").post(authenticateUser,upload.single('avatar'),updateAvatar);
 
 router.route("/updateCoverImage").post(authenticateUser,upload.single('coverImage'),updateCoverImage);
+
+router.route("/getChannelProfile/:username").get(getChannelProfile);
+
+router.route("/getWatchHistory").get(authenticateUser,getWatchHistory);
 
 // router.route("/uploadVedio").post(authenticateUser,upload.fields([
 //     {
