@@ -52,19 +52,19 @@ const registerUser = asyncHandler(async (req,res,next) => {
 
 
 const loginUser = asyncHandler(async (req,res,next) => {
-    const {userId,password} = req.body;
+    const {identifier,password} = req.body;
     
-    if( !userId && !password) throw new ApiError(400,"All fields are reuired.");
+    if( !identifier && !password) throw new ApiError(400,"All fields are reuired.");
 
-    const user = await User.find({$or:[{username : userId},{email : userId}]});
+    const user = await User.findOne({$or:[{username : identifier},{email : identifier}]});
     if(!user) throw new ApiError(400,"Invalid Credentials");
     
-    if(!(await user[0].isPasswordCorrect(password))) throw new ApiError(401,"Invalid Credentials");
+    if(!(await user.isPasswordCorrect(password))) throw new ApiError(401,"Invalid Credentials");
 
-    const accessToken = await getAccessToken(user[0]);
-    const refreshToken = await getefreshToken(user[0]);
+    const accessToken = await getAccessToken(user);
+    const refreshToken = await getefreshToken(user);
     
-    const updatedUser = await User.findById(user[0]._id).select("-password -refreshToken");
+    const updatedUser = await User.findById(user._id).select("-password -refreshToken");
 
     const options = {
         httpOnly : true,

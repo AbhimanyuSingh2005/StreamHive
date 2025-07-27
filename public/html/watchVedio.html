@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Watch Video - VEDIOTUBE</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+    /* Navbar Styles */
+    .navbar {
+      background-color: #333;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+    }
+    .navbar a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 18px;
+    }
+    .navbar a:hover {
+      text-decoration: underline;
+    }
+    /* Main container */
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 5px;
+    }
+    /* Video player styles */
+    video {
+      width: 100%;
+      max-height: 450px;
+      background: #000;
+      margin-bottom: 20px;
+    }
+    .video-info {
+      padding: 0 10px;
+    }
+    .video-title {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    .video-description {
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    .error {
+      color: red;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="/">VEDIOTUBE</a>
+  </nav>
+
+  <!-- Main Container -->
+  <div class="container">
+    <div id="videoContainer">
+      <!-- Video player will be injected here -->
+    </div>
+    <div class="video-info" id="videoInfo">
+      <!-- Video title and description -->
+    </div>
+    <div id="errorMessage" class="error"></div>
+  </div>
+
+  <script>
+    // Function to extract query parameters from URL
+    function getQueryParam(param) {
+      const params = window.location.search;
+      console.log(params);
+      return params.get(param);
+    }
+
+    // Get the video ID from URL query parameters
+    const vedioId = getQueryParam('vedioId');
+    console.log(vedioId);
+    if (!vedioId) {
+      document.getElementById('errorMessage').textContent = 'No video ID provided in URL.';
+    } else {
+      // Fetch video details using the provided video ID
+      fetch(`/api/v1/vedio/getVedioById/${vedioId}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch video details');
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Assuming your API returns the video details in data.video
+          const video = data.video;
+          if (!video) {
+            throw new Error('Video not found');
+          }
+          
+          // Create and insert the video player element
+          const videoContainer = document.getElementById('videoContainer');
+          const videoPlayer = document.createElement('video');
+          videoPlayer.setAttribute('controls', 'controls');
+          // Assuming video.url contains the video source URL
+          const source = document.createElement('source');
+          source.src = video.url;
+          // Optionally specify the type if known, e.g., 'video/mp4'
+          source.type = video.type || 'video/mp4';
+          videoPlayer.appendChild(source);
+          videoContainer.appendChild(videoPlayer);
+
+          // Display video title and description
+          const videoInfo = document.getElementById('videoInfo');
+          videoInfo.innerHTML = `
+            <h2 class="video-title">${video.title || 'Untitled Video'}</h2>
+            <p class="video-description">${video.description || ''}</p>
+          `;
+        })
+        .catch(error => {
+          console.error(error);
+          document.getElementById('errorMessage').textContent = error.message;
+        });
+    }
+  </script>
+</body>
+</html>

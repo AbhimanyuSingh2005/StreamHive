@@ -8,7 +8,7 @@ The platform will address the growing need for a scalable, user-friendly environ
 
 Technology Stack:
 
-Frontend: HTML5, CSS3, JavaScript, React.js (for dynamic UI), Video.js (for video playback)
+Frontend: HTML5, CSS3, JavaScript
 Backend: Node.js, Express.js, MongoDB (for database management)
 Cloud Storage: Amazon S3 or Google Cloud Storage (for storing video files)
 Authentication: JWT (JSON Web Tokens) for secure user authentication

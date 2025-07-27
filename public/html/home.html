@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VEDIOTUBE - Home</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+    /* Navbar Styles */
+    .navbar {
+      background-color: #333;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+    }
+    .navbar a,
+    .navbar button {
+      color: #fff;
+      text-decoration: none;
+      background: none;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .navbar a:hover,
+    .navbar button:hover {
+      text-decoration: underline;
+    }
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    /* Container for main content */
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+    /* Filter section */
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 5px;
+    }
+    .filters input,
+    .filters select,
+    .filters button {
+      padding: 8px;
+      font-size: 14px;
+    }
+    /* Video grid */
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    .video-card {
+      background: #fff;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    .video-card img {
+      width: 100%;
+      border-radius: 5px;
+    }
+    .video-title {
+      font-size: 16px;
+      margin: 10px 0 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <a href="/">VEDIOTUBE</a>
+    </div>
+    <div class="nav-right" id="nav-right">
+      <!-- This section will be populated based on login status -->
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Filters Section -->
+    <div class="filters">
+      <input type="number" id="page" placeholder="Page" value="1" min="1" style="width: 70px;" />
+      <select id="limit">
+        <option value="10">10 per page</option>
+        <option value="20">20 per page</option>
+        <option value="30">30 per page</option>
+      </select>
+      <select id="sortBy">
+        <option value="createdAt">Latest</option>
+        <option value="views">Views</option>
+        
+      </select>
+      <select id="sortType">
+        <option value="asc">Ascending</option>
+        <option value="desc">Descending</option>
+      </select>
+      <button id="applyFilters">Apply Filters</button>
+    </div>
+
+    <!-- Video Grid -->
+    <div class="video-grid" id="videoGrid">
+      <!-- Videos will be loaded here -->
+    </div>
+  </div>
+
+  <script>
+    // Check current user status by calling the API endpoint.
+    const navRight = document.getElementById('nav-right');
+    async function checkCurrentUser() {
+      try {
+        const res = await fetch('/api/v1/user/getCurrentUser');
+        if (!res.ok) {
+          throw new Error('Not logged in');
+        }
+        const data = await res.json();
+
+        // If the user is logged in and we have an avatar, show it.
+        if (data && data.data && data.data.avatar) {
+          navRight.innerHTML = `<a href="/profile"><img src="${data.data.avatar}" alt="Avatar" class="avatar"></a>`;
+        } else {
+          throw new Error('No avatar found');
+        }
+      } catch (error) {
+        // If any error occurs, show Login and Sign Up buttons.
+        navRight.innerHTML = `
+          <button onclick="window.location.href='/login'">Login</button>
+          <button onclick="window.location.href='/register'">Sign Up</button>
+        `;
+      }
+    }
+
+    checkCurrentUser();
+
+    // Function to fetch videos with given filters
+    async function fetchVideos() {
+      const page = document.getElementById('page').value;
+      const limit = document.getElementById('limit').value;
+      const sortBy = document.getElementById('sortBy').value;
+      const sortType = document.getElementById('sortType').value;
+
+      const url = new URL('/api/v1/vedio/getAllVideos', window.location.origin);
+      url.searchParams.append('page', page);
+      url.searchParams.append('limit', limit);
+      url.searchParams.append('sortBy', sortBy);
+      url.searchParams.append('sortType', sortType);
+      console.log(url)
+      try {
+        const response = await fetch(url);
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Assuming the API returns an array of videos in data.videos
+          displayVideos(data.data || []);
+        } else {
+          console.error('Error fetching videos');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+
+    // Function to display videos in the grid
+    function displayVideos(videos) {
+      const videoGrid = document.getElementById('videoGrid');
+      videoGrid.innerHTML = ''; // Clear previous results
+      if (videos.length === 0) {
+        videoGrid.innerHTML = '<p>No videos found.</p>';
+        return;
+      }
+      videos.forEach(video => {
+        const card = document.createElement('div');
+        card.className = 'video-card';
+        // Adjust the below properties as per your video object structure.
+        card.innerHTML = `
+          <a href="/watch/${video._id}">
+            <img src="${video.thumbnail}" alt="${video.title}" />
+            <p class="video-title">${video.title}</p>
+          </a>
+        `;
+        videoGrid.appendChild(card);
+      });
+    }
+
+    // Event listener for filter button
+    document.getElementById('applyFilters').addEventListener('click', fetchVideos);
+
+    // Fetch videos on page load with default filters
+    fetchVideos();
+  </script>
+</body>
+</html>

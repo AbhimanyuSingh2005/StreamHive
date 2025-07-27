@@ -30,6 +30,7 @@ const publishVedio = asyncHandler(async(req,res,next)=>{
 })
 
 const getAllVideos = asyncHandler(async (req, res) => {
+    
     const { page = 1, limit = 10, sortBy = 'createdAt', sortType = 'desc' } = req.query;
     const sortOptions = {};
     sortOptions[sortBy] = sortType === "asc" ? 1 : -1;
@@ -37,9 +38,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
     const vedios = await Vedio.find({ isPublished: true })
         .sort(sortOptions)
         .limit(limit * 1)
-        .skip((page - 1) * limit)
-        .exec();
-
+        .skip((page - 1) * limit);
     res.status(200).json(new ApiResponse(200, "All vedios", vedios));
 })
 
