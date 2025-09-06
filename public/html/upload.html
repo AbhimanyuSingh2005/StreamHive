@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upload Video - VEDIOTUBE</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/">VEDIOTUBE</a>
+    <a href="/profile" class="button">My Profile</a>
+  </nav>
+  
+  <div class="container">
+    <h2>Upload a New Video</h2>
+    <form id="uploadForm">
+      <label for="title">Title:</label>
+      <input type="text" id="title" placeholder="Video Title" required>
+      
+      <label for="description">Description:</label>
+      <textarea id="description" placeholder="Video Description" required></textarea>
+      
+      <label for="vedio">Video File:</label>
+      <input type="file" id="vedio" accept="video/*" required>
+      
+      <label for="thumbnail">Thumbnail Image:</label>
+      <input type="file" id="thumbnail" accept="image/*" required>
+      
+      <button type="submit">Upload</button>
+    </form>
+    <div id="uploadStatus"></div>
+  </div>
+
+  <script>
+    document.getElementById('uploadForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+      const statusDiv = document.getElementById('uploadStatus');
+      statusDiv.textContent = 'Uploading... Please wait.';
+      
+      const formData = new FormData();
+      formData.append('title', document.getElementById('title').value);
+      formData.append('description', document.getElementById('description').value);
+      formData.append('vedio', document.getElementById('vedio').files[0]);
+      formData.append('thumbnail', document.getElementById('thumbnail').files[0]);
+      
+      try {
+        const response = await fetch('/api/v1/vedio/publishVedio', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          statusDiv.textContent = 'Upload successful! Redirecting...';
+          const data = await response.json();
+          // Redirect to the watch page for the new video
+          window.location.href = `/watch/${data.data._id}`;
+        } else {
+          const error = await response.json();
+          statusDiv.textContent = `Upload failed: ${error.message || 'Unknown error'}`;
+        }
+      } catch (error) {
+        statusDiv.textContent = `An error occurred: ${error.message}`;
+      }
+    });
+  </script>
+</body>
+</html>

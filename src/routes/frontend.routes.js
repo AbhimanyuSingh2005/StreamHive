@@ -18,4 +18,16 @@ router.get("/watch/:vedioID",(req,res)=>{
     res.sendFile("watchVedio.html",{root:"./public/html"});
 })
 
+router.get("/profile", (req, res) => {
+    res.sendFile("profile.html", { root: "./public/html" });
+});
+
+router.get("/upload", (req, res) => {
+    res.sendFile("upload.html", { root: "./public/html" });
+});
+
+router.get("/update-vedio/:vedioId", (req, res) => {
+    res.sendFile("update-vedio.html", { root: "./public/html" });
+});
+
 export default router;

@@ -50,6 +50,12 @@ const getVedioById = asyncHandler(async (req, res) => {
     res.status(200).json(new ApiResponse(200, "Vedio", vedio));
 })
 
+const getUserVedios = asyncHandler(async (req, res) => {
+    const { userId } = req.params;
+    const vedios = await Vedio.find({ onwer: userId });
+    res.status(200).json(new ApiResponse(200, "User vedios", vedios));
+});
+
 const updateVedio = asyncHandler(async (req, res) => {
     const vedioId = req.query.vedioId;
     const userId = req.user._id;
@@ -97,5 +103,6 @@ export {
     getVedioById,
     updateVedio,
     deleteVedio,
-    toogglePublish
+    toogglePublish,
+    getUserVedios
 }

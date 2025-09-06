@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Update Video - VEDIOTUBE</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/">VEDIOTUBE</a>
+    <a href="/profile" class="button">My Profile</a>
+  </nav>
+  
+  <div class="container">
+    <h2>Update Your Video</h2>
+    <form id="updateForm">
+      <label for="title">Title:</label>
+      <input type="text" id="title" placeholder="Video Title" required>
+      
+      <label for="description">Description:</label>
+      <textarea id="description" placeholder="Video Description" required></textarea>
+      
+      <button type="submit">Update Video</button>
+    </form>
+    <div id="updateStatus"></div>
+  </div>
+
+  <script>
+    const vedioId = window.location.pathname.split('/').pop();
+    const titleInput = document.getElementById('title');
+    const descriptionInput = document.getElementById('description');
+    const statusDiv = document.getElementById('updateStatus');
+
+    // Fetch video data on page load
+    async function loadVedioData() {
+      try {
+        const response = await fetch(`/api/v1/vedio/getVedioById/${vedioId}`);
+        if (!response.ok) throw new Error('Failed to fetch video data.');
+        const res = await response.json();
+        const vedio = res.data;
+        titleInput.value = vedio.title;
+        descriptionInput.value = vedio.description;
+      } catch (error) {
+        statusDiv.textContent = error.message;
+      }
+    }
+
+    document.getElementById('updateForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+      statusDiv.textContent = 'Updating...';
+      
+      const payload = {
+        title: titleInput.value,
+        description: descriptionInput.value
+      };
+      
+      try {
+        const response = await fetch(`/api/v1/vedio/updateVedio?vedioId=${vedioId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          statusDiv.textContent = 'Update successful! Redirecting...';
+          window.location.href = '/profile';
+        } else {
+          const error = await response.json();
+          statusDiv.textContent = `Update failed: ${error.message || 'Unknown error'}`;
+        }
+      } catch (error) {
+        statusDiv.textContent = `An error occurred: ${error.message}`;
+      }
+    });
+
+    loadVedioData();
+  </script>
+</body>
+</html>

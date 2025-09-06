@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Profile - VEDIOTUBE</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/">VEDIOTUBE</a>
+    <div class="nav-right">
+        <a href="/upload" class="button">Upload Video</a>
+    </div>
+  </nav>
+
+  <div class="container" id="profileContainer">
+    <!-- Profile content will be loaded here -->
+  </div>
+
+  <script>
+    const profileContainer = document.getElementById('profileContainer');
+    let currentUser;
+
+    async function loadProfile() {
+      try {
+        const res = await fetch('/api/v1/user/getCurrentUser');
+        if (!res.ok) {
+          window.location.href = '/login';
+          return;
+        }
+        const { data: user } = await res.json();
+        currentUser = user;
+
+        profileContainer.innerHTML = `
+          <div class="profile-header">
+            <img src="${user.coverImage || 'https://via.placeholder.com/900x200'}" alt="Cover Image" class="cover-image">
+            <img src="${user.avatar}" alt="Avatar" class="avatar">
+            <div class="profile-info">
+              <h2>${user.fullName}</h2>
+              <p>@${user.username}</p>
+              <p>${user.email}</p>
+            </div>
+          </div>
+
+          <div class="tabs">
+            <div class="tab active" onclick="showTab('details')">Update Details</div>
+            <div class="tab" onclick="showTab('images')">Update Images</div>
+            <div class="tab" onclick="showTab('password')">Change Password</div>
+            <div class="tab" onclick="showTab('myVedios')">My Videos</div>
+          </div>
+
+          <div id="details" class="tab-content active">
+            <h3>Update Your Details</h3>
+            <form id="detailsForm">
+              <label for="fullName">Full Name:</label>
+              <input type="text" id="fullName" value="${user.fullName}" required>
+              <label for="username">Username:</label>
+              <input type="text" id="username" value="${user.username}" required>
+              <label for="email">Email:</label>
+              <input type="email" id="email" value="${user.email}" required>
+              <button type="submit">Update Details</button>
+            </form>
+          </div>
+
+          <div id="images" class="tab-content">
+            <h3>Update Images</h3>
+            <form id="avatarForm">
+              <label for="avatar">New Avatar:</label>
+              <input type="file" id="avatarFile" accept="image/*" required>
+              <button type="submit">Update Avatar</button>
+            </form>
+            <hr>
+            <form id="coverImageForm">
+              <label for="coverImage">New Cover Image:</label>
+              <input type="file" id="coverImageFile" accept="image/*" required>
+              <button type="submit">Update Cover Image</button>
+            </form>
+          </div>
+
+          <div id="password" class="tab-content">
+            <h3>Change Password</h3>
+            <form id="passwordForm">
+              <label for="oldPassword">Old Password:</label>
+              <input type="password" id="oldPassword" required>
+              <label for="newPassword">New Password:</label>
+              <input type="password" id="newPassword" required>
+              <button type="submit">Change Password</button>
+            </form>
+          </div>
+
+          <div id="myVedios" class="tab-content">
+            <h3>My Videos</h3>
+            <div id="vedioList" class="video-grid">
+              <!-- Video list will be populated here -->
+            </div>
+          </div>
+          
+          <button class="logout-btn btn-danger" id="logoutBtn">Logout</button>
+        `;
+        attachFormListeners();
+      } catch (error) {
+        console.error('Failed to load profile:', error);
+        profileContainer.innerHTML = '<p>Could not load profile. Please try again.</p>';
+      }
+    }
+
+    function showTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.getElementById(tabName).classList.add('active');
+      document.querySelector(`.tab[onclick="showTab('${tabName}')"]`).classList.add('active');
+      if (tabName === 'myVedios') {
+        loadUserVedios();
+      }
+    }
+
+    async function loadUserVedios() {
+        if (!currentUser) return;
+        const vedioList = document.getElementById('vedioList');
+        vedioList.innerHTML = '<p>Loading videos...</p>';
+        try {
+            const res = await fetch(`/api/v1/vedio/user/${currentUser._id}`);
+            if (!res.ok) throw new Error('Failed to fetch videos');
+            const { data: vedios } = await res.json();
+            if (vedios.length === 0) {
+                vedioList.innerHTML = '<p>You have not uploaded any videos yet.</p>';
+                return;
+            }
+            vedioList.innerHTML = vedios.map(vedio => `
+                <div class="video-card">
+                    <a href="/watch/${vedio._id}">
+                        <img src="${vedio.thumbnail}" alt="${vedio.title}">
+                    </a>
+                    <div class="video-card-content">
+                        <h3 class="video-title">${vedio.title}</h3>
+                        <p>Views: ${vedio.views}</p>
+                        <a href="/update-vedio/${vedio._id}" class="button">Update</a>
+                    </div>
+                </div>
+            `).join('');
+        } catch (error) {
+            vedioList.innerHTML = `<p>${error.message}</p>`;
+        }
+    }
+
+    function attachFormListeners() {
+      document.getElementById('detailsForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = {
+          fullName: document.getElementById('fullName').value,
+          username: document.getElementById('username').value,
+          email: document.getElementById('email').value,
+        };
+        const res = await fetch('/api/v1/user/updateUserDetails', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        alert(res.ok ? 'Details updated successfully!' : 'Failed to update details.');
+        if(res.ok) location.reload();
+      });
+
+      document.getElementById('avatarForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('avatar', document.getElementById('avatarFile').files[0]);
+        const res = await fetch('/api/v1/user/updateAvatar', { method: 'POST', body: formData });
+        alert(res.ok ? 'Avatar updated successfully!' : 'Failed to update avatar.');
+        if(res.ok) location.reload();
+      });
+
+      document.getElementById('coverImageForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('coverImage', document.getElementById('coverImageFile').files[0]);
+        const res = await fetch('/api/v1/user/updateCoverImage', { method: 'POST', body: formData });
+        alert(res.ok ? 'Cover image updated successfully!' : 'Failed to update cover image.');
+        if(res.ok) location.reload();
+      });
+
+      document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = {
+          oldPassword: document.getElementById('oldPassword').value,
+          newPassword: document.getElementById('newPassword').value,
+        };
+        const res = await fetch('/api/v1/user/updatePassword', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        alert(res.ok ? 'Password changed successfully! Please log in again.' : 'Failed to change password.');
+        if(res.ok) logout();
+      });
+      
+      document.getElementById('logoutBtn').addEventListener('click', logout);
+    }
+    
+    async function logout() {
+        await fetch('/api/v1/user/logout', { method: 'POST' });
+        window.location.href = '/login';
+    }
+
+    loadProfile();
+  </script>
+</body>
+</html>

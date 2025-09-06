@@ -5,7 +5,8 @@ import {
     getVedioById,
     updateVedio,
     deleteVedio,
-    toogglePublish
+    toogglePublish,
+    getUserVedios
 } from "../controllers/vedio.controllers.js";
 import { upload } from "../middlewares/multer.middlewares.js";
 import {authenticateUser} from "../middlewares/authenticate.middlewares.js";
@@ -25,6 +26,8 @@ router.route("/publishVedio").post(authenticateUser,upload.fields([
 router.route("/getAllVideos").get(getAllVideos);
 
 router.route("/getVedioById/:vedioId").get(getVedioById);
+
+router.route("/user/:userId").get(getUserVedios);
 
 router.route("/updateVedio").post(authenticateUser,updateVedio);
 

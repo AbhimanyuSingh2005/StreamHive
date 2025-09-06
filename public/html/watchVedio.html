@@ -74,20 +74,41 @@
     <div class="video-info" id="videoInfo">
       <!-- Video title and description -->
     </div>
+    <div class="video-actions">
+        <button id="likeBtn">Like</button>
+        <span id="likeCount">0</span>
+    </div>
+    <hr>
+    <div class="comments-section">
+        <h3>Comments</h3>
+        <form id="commentForm">
+            <textarea id="commentContent" placeholder="Add a public comment..." required></textarea>
+            <button type="submit">Comment</button>
+        </form>
+        <div id="commentsContainer">
+            <!-- Comments will be loaded here -->
+        </div>
+    </div>
     <div id="errorMessage" class="error"></div>
   </div>
 
   <script>
-    // Function to extract query parameters from URL
-    function getQueryParam(param) {
-      const params = window.location.search;
-      console.log(params);
-      return params.get(param);
+    const pathParts = window.location.pathname.split('/');
+    const vedioId = pathParts[pathParts.length - 1];
+    let currentUser = null;
+
+    async function getCurrentUser() {
+        try {
+            const res = await fetch('/api/v1/user/getCurrentUser');
+            if (res.ok) {
+                const { data } = await res.json();
+                currentUser = data;
+            }
+        } catch (error) {
+            console.log('Not logged in');
+        }
     }
 
-    // Get the video ID from URL query parameters
-    const vedioId = getQueryParam('vedioId');
-    console.log(vedioId);
     if (!vedioId) {
       document.getElementById('errorMessage').textContent = 'No video ID provided in URL.';
     } else {
@@ -99,9 +120,9 @@
           }
           return response.json();
         })
-        .then(data => {
-          // Assuming your API returns the video details in data.video
-          const video = data.video;
+        .then(res => {
+          // The API returns the video details in res.data
+          const video = res.data;
           if (!video) {
             throw new Error('Video not found');
           }
@@ -110,11 +131,10 @@
           const videoContainer = document.getElementById('videoContainer');
           const videoPlayer = document.createElement('video');
           videoPlayer.setAttribute('controls', 'controls');
-          // Assuming video.url contains the video source URL
+          
           const source = document.createElement('source');
-          source.src = video.url;
-          // Optionally specify the type if known, e.g., 'video/mp4'
-          source.type = video.type || 'video/mp4';
+          source.src = video.vedioFile; // Correct field for video url
+          source.type = 'video/mp4';
           videoPlayer.appendChild(source);
           videoContainer.appendChild(videoPlayer);
 
@@ -129,7 +149,61 @@
           console.error(error);
           document.getElementById('errorMessage').textContent = error.message;
         });
+        
+        loadComments();
     }
+
+    async function loadComments() {
+        await getCurrentUser();
+        const commentsContainer = document.getElementById('commentsContainer');
+        try {
+            const res = await fetch(`/api/v1/comments/${vedioId}`);
+            if (!res.ok) throw new Error('Failed to load comments');
+            const { data: comments } = await res.json();
+            commentsContainer.innerHTML = comments.docs.map(comment => `
+                <div class="comment">
+                    <p><strong>@${comment.owner.username}</strong>: ${comment.content}</p>
+                </div>
+            `).join('');
+        } catch (error) {
+            commentsContainer.innerHTML = `<p>${error.message}</p>`;
+        }
+    }
+
+    document.getElementById('commentForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        if (!currentUser) {
+            alert('You must be logged in to comment.');
+            return;
+        }
+        const content = document.getElementById('commentContent').value;
+        const res = await fetch(`/api/v1/comments/${vedioId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content })
+        });
+        if (res.ok) {
+            document.getElementById('commentContent').value = '';
+            loadComments();
+        } else {
+            alert('Failed to add comment.');
+        }
+    });
+
+    document.getElementById('likeBtn').addEventListener('click', async function() {
+        if (!currentUser) {
+            alert('You must be logged in to like a video.');
+            return;
+        }
+        const res = await fetch(`/api/v1/likes/toggle/v/${vedioId}`, { method: 'POST' });
+        if (res.ok) {
+            const { data } = await res.json();
+            this.textContent = data.isLiked ? 'Unlike' : 'Like';
+        } else {
+            alert('Failed to toggle like.');
+        }
+    });
+
   </script>
 </body>
 </html>
