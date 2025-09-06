@@ -25,7 +25,7 @@ router.route("/publishVedio").post(authenticateUser,upload.fields([
 
 router.route("/getAllVideos").get(getAllVideos);
 
-router.route("/getVedioById/:vedioId").get(getVedioById);
+router.route("/getVedioById/:vedioId").get( getVedioById);
 
 router.route("/user/:userId").get(getUserVedios);
 

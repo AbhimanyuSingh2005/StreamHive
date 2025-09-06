@@ -5,6 +5,10 @@ body {
   background-color: #f0f2f5;
   color: #1c1e21;
 }
+a {
+  color: #ffff;
+  text-decoration: none;
+}
 
 /* Navbar */
 .navbar {
@@ -17,17 +21,21 @@ body {
   border-bottom: 1px solid #dddfe2;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-.navbar a {
+.navbar a{
   color: #007bff;
   text-decoration: none;
   font-size: 1.5rem;
   font-weight: bold;
 }
-.navbar a:hover {
-  text-decoration: underline;
+.navbar .profile_btn {
+    color: #fff;
 }
-.navbar .nav-right a,
-.navbar .nav-right button {
+/* .navbar a:hover {
+  text-decoration: underline;
+} */
+
+/* .navbar .nav-right a, */
+/* .navbar .nav-right .button {
     color: #fff;
     background-color: #007bff;
     border: none;
@@ -37,8 +45,8 @@ body {
     font-size: 1rem;
     cursor: pointer;
     margin-left: 10px;
-}
-.navbar .nav-right a:hover,
+} */
+/* .navbar .nav-right a:hover, */
 .navbar .nav-right button:hover {
     background-color: #0056b3;
     text-decoration: none;
@@ -110,6 +118,9 @@ button[type="submit"] {
 
 /* Filter section */
 .filters {
+  width: 98%;
+  justify-content: space-around;
+  align-items: center;
   display: flex;
   flex-wrap: nowrap;
   gap: 10px;
@@ -122,6 +133,7 @@ button[type="submit"] {
 .filters input,
 .filters select,
 .filters button {
+  max-width: fit-content;
   padding: 8px;
   font-size: 14px;
   flex-shrink: 0;

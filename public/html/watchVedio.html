@@ -1,43 +1,10 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Watch Video - VEDIOTUBE</title>
+  <title>Watch Video - STREAMHIVE</title>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      color: #333;
-    }
-    /* Navbar Styles */
-    .navbar {
-      background-color: #333;
-      color: #fff;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 20px;
-    }
-    .navbar a {
-      color: #fff;
-      text-decoration: none;
-      font-size: 18px;
-    }
-    .navbar a:hover {
-      text-decoration: underline;
-    }
-    /* Main container */
-    .container {
-      max-width: 800px;
-      margin: 20px auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 5px;
-    }
-    /* Video player styles */
-    video {
+     video {
       width: 100%;
       max-height: 450px;
       background: #000;
@@ -59,11 +26,15 @@
       text-align: center;
     }
   </style>
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <!-- Navbar -->
   <nav class="navbar">
-    <a href="/">VEDIOTUBE</a>
+    <a href="/">STREAMHIVE</a>
+     <div class="nav-right" id="nav-right">
+      <!-- This section will be populated based on login status -->
+    </div>
   </nav>
 
   <!-- Main Container -->
@@ -93,6 +64,31 @@
   </div>
 
   <script>
+    const navRight = document.getElementById('nav-right');
+    async function checkCurrentUser() {
+      try {
+        const res = await fetch('/api/v1/user/getCurrentUser');
+        if (!res.ok) {
+          throw new Error('Not logged in');
+        }
+        const data = await res.json();
+
+        // If the user is logged in and we have an avatar, show it.
+        if (data && data.data && data.data.avatar) {
+          navRight.innerHTML = `<a href="/profile"><img src="${data.data.avatar}" alt="Avatar" class="avatar"></a>`;
+        } else {
+          throw new Error('No avatar found');
+        }
+      } catch (error) {
+        // If any error occurs, show Login and Sign Up buttons.
+        navRight.innerHTML = `
+          <button onclick="window.location.href='/login'">Login</button>
+          <button onclick="window.location.href='/register'">Sign Up</button>
+        `;
+      }
+    }
+
+    checkCurrentUser();
     const pathParts = window.location.pathname.split('/');
     const vedioId = pathParts[pathParts.length - 1];
     let currentUser = null;
@@ -151,6 +147,7 @@
         });
         
         loadComments();
+        loadLikeDetails();
     }
 
     async function loadComments() {
@@ -167,6 +164,24 @@
             `).join('');
         } catch (error) {
             commentsContainer.innerHTML = `<p>${error.message}</p>`;
+        }
+    }
+
+    async function loadLikeDetails() {
+        const likeBtn = document.getElementById('likeBtn');
+        const likeCountSpan = document.getElementById('likeCount');
+        try {
+            const res = await fetch(`/api/v1/likes/details/v/${vedioId}`);
+            if (!res.ok) throw new Error('Failed to load like details');
+            const { data } = await res.json();
+            likeCountSpan.textContent = data.likeCount;
+            if (data.isLiked) {
+                likeBtn.textContent = 'Unlike';
+            } else {
+                likeBtn.textContent = 'Like';
+            }
+        } catch (error) {
+            console.error(error);
         }
     }
 
@@ -197,8 +212,7 @@
         }
         const res = await fetch(`/api/v1/likes/toggle/v/${vedioId}`, { method: 'POST' });
         if (res.ok) {
-            const { data } = await res.json();
-            this.textContent = data.isLiked ? 'Unlike' : 'Like';
+            loadLikeDetails();
         } else {
             alert('Failed to toggle like.');
         }

@@ -45,8 +45,19 @@ const getAllVideos = asyncHandler(async (req, res) => {
 const getVedioById = asyncHandler(async (req, res) => {
     const vedioId = req.params.vedioId;
     if(!vedioId) throw new ApiError(401,"Vedio Id is required");
+
     const vedio = await Vedio.findById(vedioId);
     if(!vedio) throw new ApiError(404,"Vedio not found");
+
+    // Increment views
+    vedio.views = (vedio.views || 0) + 1;
+    await vedio.save({ validateBeforeSave: false });
+
+    // Add to watch history if user is logged in
+    if (req.user) {
+        await User.findByIdAndUpdate(req.user._id, { $addToSet: { watchHistory: vedioId } });
+    }
+
     res.status(200).json(new ApiResponse(200, "Vedio", vedio));
 })
 
