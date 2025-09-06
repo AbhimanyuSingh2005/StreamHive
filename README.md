@@ -1,32 +1,94 @@
-Project Synopsis: Video Streaming Web Application
-Project Title: Video Streaming Web Application (Similar to YouTube)
+# StreamHive
 
-Objective:
-The primary objective of this project is to develop a video streaming web application where users can upload, view, and interact with video content. The platform will provide a seamless, intuitive user experience for video sharing and viewing, enabling creators to reach a wider audience. The application will also support essential features such as video recommendations, user interaction (comments, likes, and shares), and personalized user accounts for content management.
+StreamHive is a robust backend solution for a video sharing platform, inspired by services like YouTube. It provides all the essential features for user management, video handling, and social interactions like comments, likes, and subscriptions.
 
-The platform will address the growing need for a scalable, user-friendly environment for video sharing, offering users a space to watch and engage with content while also providing content creators with the tools to manage and share their videos effectively.
+## Features
 
-Technology Stack:
+- **User Authentication:** Secure user registration and login using JWT and bcrypt for password hashing.
+- **Video Management:** Upload, view, update, and delete videos.
+- **Cloud Media Storage:** Integrates with Cloudinary for efficient video and image thumbnail storage.
+- **Social Features:**
+    - Like and dislike videos.
+    - Comment on videos.
+    - Subscribe to channels.
+- **User Profiles:** View user profiles and their uploaded videos.
+- **Search:** (Future implementation) Search for videos and channels.
 
-Frontend: HTML5, CSS3, JavaScript
-Backend: Node.js, Express.js, MongoDB (for database management)
-Cloud Storage: Amazon S3 or Google Cloud Storage (for storing video files)
-Authentication: JWT (JSON Web Tokens) for secure user authentication
-Video Streaming: HLS (HTTP Live Streaming) or DASH (Dynamic Adaptive Streaming over HTTP)
-APIs: RESTful APIs for frontend-backend interaction
-Content Delivery Network (CDN): Cloudflare or AWS CloudFront (for efficient video delivery)
-Expected Outcomes: The final product will feature a fully functional video streaming platform that allows users to upload, view, like, comment, and share videos. The backend will handle video uploads, user management, and video streaming efficiently, ensuring smooth video playback across multiple devices. The project will include an admin dashboard to monitor content and manage user accounts. Additionally, security measures will be in place to protect user data and video content.
+## Technologies Used
 
-Future Scope:
+- **Backend:** Node.js, Express.js
+- **Database:** MongoDB with Mongoose ODM
+- **Authentication:** JSON Web Tokens (JWT)
+- **Password Hashing:** bcrypt
+- **File Uploads:** Multer
+- **Cloud Storage:** Cloudinary
+- **API Development:** RESTful API design
 
-Live Streaming: Introducing live streaming functionality to support real-time content broadcast.
-Mobile App Integration: Expanding to mobile platforms (iOS and Android) for a seamless experience across devices.
-Enhanced Recommendations: Implementing machine learning-based algorithms for personalized video recommendations.
-Monetization: Implementing ads, subscriptions, or paid content features to monetize the platform.
-Internationalization: Supporting multiple languages to reach a broader global audience.
-Target Audience:
+## Prerequisites
 
-Content creators (individuals, educators, and companies) who want a platform to upload and share video content.
-Viewers who are looking for an engaging platform to watch videos across different categories like education, entertainment, news, etc.
-Developers and administrators who will maintain and improve the platform.
-This project aims to create a scalable and feature-rich platform for video streaming, focusing on performance, user interaction, and content management. It has the potential to grow with additional features such as live streaming and mobile apps in the future.
+Before you begin, ensure you have the following installed:
+- [Node.js](https://nodejs.org/en/) (v18.x or higher recommended)
+- [npm](https://www.npmjs.com/)
+- [MongoDB](https://www.mongodb.com/try/download/community) installed and running.
+- A [Cloudinary](https://cloudinary.com/) account for media storage.
+
+## Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/your-username/StreamHive.git
+    cd StreamHive
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+## Environment Variables
+
+Create a `.env` file in the root directory of the project and add the following environment variables. These are essential for the application to run correctly.
+
+```env
+PORT=8000
+MONGODB_URI=mongodb://localhost:27017/streamhive
+
+CORS_ORIGIN=*
+
+ACCESS_TOKEN_SECRET=your_access_token_secret
+ACCESS_TOKEN_EXPIRY=1d
+REFRESH_TOKEN_SECRET=your_refresh_token_secret
+REFRESH_TOKEN_EXPIRY=10d
+
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+```
+
+-   `PORT`: The port on which the server will run.
+-   `MONGODB_URI`: The connection string for your MongoDB database.
+-   `CORS_ORIGIN`: The allowed origin for Cross-Origin Resource Sharing.
+-   `ACCESS_TOKEN_SECRET` & `REFRESH_TOKEN_SECRET`: Secret keys for JWT. You can generate these using a random string generator.
+-   `CLOUDINARY_*`: Your Cloudinary account credentials.
+
+## Running the Application
+
+To run the application in development mode with automatic restarts on file changes, use:
+
+```bash
+npm test
+```
+
+This command utilizes `nodemon` to monitor for any changes in your source files and automatically restarts the server.
+
+## API Routes
+
+The application exposes the following RESTful API endpoints:
+
+-   `api/v1/users`: User management (register, login, logout, profile)
+-   `api/v1/vedios`: Video management (upload, get, update, delete)
+-   `api/v1/comments`: Comment management on videos
+-   `api/v1/likes`: Liking and unliking videos and comments
+-   `api/v1/subscriptions`: Subscribing and unsubscribing to channels
+
+For detailed information on the API, please refer to the route definitions in the `src/routes/` directory.
