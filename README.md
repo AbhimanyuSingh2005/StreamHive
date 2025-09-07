@@ -1,4 +1,4 @@
-# StreamHive  | [LIVE]{https://streamhive-bdiz.onrender.com/}
+# StreamHive  | [LIVE](https://streamhive-bdiz.onrender.com/)
 
 StreamHive is a robust backend solution for a video sharing platform, inspired by services like YouTube. It provides all the essential features for user management, video handling, and social interactions like comments, likes, and subscriptions.
 
